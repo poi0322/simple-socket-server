@@ -1,3 +1,3 @@
 # simple-socket-server
 
-simple socket I/O Streaming server
+simple Multi Thread socket I/O Streaming server
