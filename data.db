@@ -1,0 +1,4 @@
+member admin 1234 어드민 12000
+member guest 1234 게스트 3000
+rank 게스트 3000
+rank 어드민 12000
