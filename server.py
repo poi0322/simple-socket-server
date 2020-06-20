@@ -3,6 +3,8 @@ from _thread import *
 
 
 def threaded(client_socket, addr):
+    global member
+    global rank
     # 함수안에서 전역변수를 사용하려면 global 키워드를 이용해 명시적으로 불러주세요 ex) global data_store
     print('Connected by :', addr[0], ':', addr[1])
     # 3333333
@@ -20,15 +22,16 @@ def threaded(client_socket, addr):
                 break
 
             # 받으면 한번 표시해보고
-            print('Received from ' + addr[0], ':', addr[1], data.decode())
+            print('Received from ' + addr[0], ':', addr[1], data.decode('euc-kr'))
 
+            print(data.decode('euc-kr'))
             # 자르고
-            split_data = data.decode().split(' ')
+            split_data = data.decode('euc-kr').split(' ')
             print(split_data)  # split_data example : ['login', 'admin', '1234']
             # 맨앞에꺼 opcode
             op = split_data[0]
 
-            # 4444444 여기서부터 로직 짜면됨
+            # 너 왜이래
             if op == 'register':
                 print('get register operation')
                 member.append({'id': split_data[1], 'pw': split_data[2], 'name': split_data[3], 'score': 0})
@@ -37,32 +40,37 @@ def threaded(client_socket, addr):
                 print('login operation')
                 login_flag = False
                 for m in member:
-                    if m.id == split_data[1]:
-                        if m.pw == split_data[2]:
-                            client_socket.send(str.encode('ok '+m.name+' '+m.score))
+                    print(m)
+                    if m['id'] == split_data[1]:
+                        if m['pw'] == split_data[2]:
+                            client_socket.send(str('ok '+m['name']+' '+str(m['score'])).encode(encoding='euc-kr'))
                             login_flag = True
                             break
                         else:
                             client_socket.send(str.encode('fail wrongPassword'))
+                            login_flag = True
                 if not login_flag:
                     client_socket.send(str.encode('fail invalidId'))
             elif op == 'rank':
                 for r in rank:
-                    client_socket.send(str.encode('rank '+r.name+''+r.score+'\n'))
+                    client_socket.send(str.encode('rank '+r['name']+''+r['score']+'\n'))
                 client_socket.send(str.encode('rank end'))
             elif op == 'scoreUpdate':
                 for i,m in enumerate(member):
-                    if m.name == split_data[1]:
-                        member[i].score = int(split_data[2])
+                    if m['name'] == split_data[1]:
+                        member[i]['score'] = int(split_data[2])
                         rank.append({'name': split_data[1], 'score': int(split_data[2])})
                 client_socket.send(str.encode('upt success'))
 
             saveAll()
 
-        # 연결 리셋 에러
+        # 연결 리셋
         except ConnectionResetError as e:
             print('Disconnected by ' + addr[0], ':', addr[1])
             break
+
+        # except:
+        #     print("error")
 
     client_socket.close()
 
@@ -72,14 +80,14 @@ def saveAll():
     rank = sorted(rank, key=lambda x: x['score'], reverse=True)
     w = open('data.db', mode='wt', encoding='utf-8')
     for m in member:
-        w.write("member " + m.id + " " + m.pw + " " + m.name + " " + m.score + "\n")
+        w.write("member " + m['id'] + " " + m['pw'] + " " + m['name'] + " " + str(m['score']) + "\n")
     for r in rank:
-        w.write('write ' + r.name + " " + r.score + "\n")
+        w.write('write ' + r['name'] + " " + r['score'] + "\n")
     w.close()
 
 
 # 접속할 서버 주소임
-HOST = '127.0.0.1'
+HOST = '192.168.0.186'
 PORT = 9898
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
