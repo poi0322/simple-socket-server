@@ -39,16 +39,16 @@ def threaded(client_socket, addr):
                 for m in member:
                     if m.id == split_data[1]:
                         if m.pw == split_data[2]:
-                            client_socket.send(str.encode('ok'))
+                            client_socket.send(str.encode('ok '+m.name+' '+m.score))
                             login_flag = True
                             break
                         else:
-                            client_socket.send(str.encode('wrong password'))
+                            client_socket.send(str.encode('fail wrongPassword'))
                 if not login_flag:
-                    client_socket.send(str.encode('invalid id'))
+                    client_socket.send(str.encode('fail invalidId'))
             elif op == 'rank':
                 for r in rank:
-                    client_socket.send(str.encode(r.name+''+r.score+'\n'))
+                    client_socket.send(str.encode('rank '+r.name+''+r.score+'\n'))
                 client_socket.send(str.encode('rank end'))
             elif op == 'scoreUpdate':
                 for i,m in enumerate(member):
